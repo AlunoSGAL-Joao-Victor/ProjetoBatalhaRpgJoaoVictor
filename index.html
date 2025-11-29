@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Batalha RPG SuperGeeks - Versão Bootstrap</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="text-center p-0">
+
+  <img src="imgs/logo.png" id="Logo" class="mb-0">
+
+  <div class="container">
+    <div class="row justify-content-center">
+
+      <!-- Personagem -->
+      <div class="col-md-4">
+        <div id="cardpersonagem" class="card mb-3 shadow">
+          <div class="card-body">
+            <h3 class="card-title">🎮 Jogador</h3>
+            <select id="personagemEscolhidoId" class="form-select my-2" onchange="selecionarPersonagem()"></select>
+            <p>Vida: <span id="vidaPersonagemId" class="fw-bold"></span></p>
+            <p>Dano: <span id="danoPersonagemId" class="fw-bold"></span></p>
+            <img id="imagemPersonagemId" class="img-fluid rounded border border-dark" width="100" height="100">
+          </div>
+        </div>
+      </div>
+
+      <!-- Inimigo -->
+      <div class="col-md-4">
+        <div id="cardinimigo" class="card mb-3 shadow">
+          <div class="card-body">
+            <h3 class="card-title">💀 Adversário</h3>
+            <select id="selecaoInimigosId" class="form-select my-2" onchange="selecionarGrupo()"></select>
+            <select id="inimigosEscolhidosId" class="form-select my-2" onchange="selecionarInimigo()"></select>
+            <p>Vida: <span id="vidaInimigoId" class="fw-bold"></span></p>
+            <p>Dano: <span id="danoInimigoId" class="fw-bold"></span></p>
+            <img id="imagemInimigoId" class="img-fluid rounded border border-light" width="100" height="100">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões de ação -->
+    <div class="my-3">
+      <button class="btn btn-danger btn-lg me-2" onclick="atacar()">Atacar</button>
+      <button id="botaoSaquearId" class="btn btn-warning btn-lg" onclick="saquear()" disabled>Saquear</button>
+    </div>
+
+    <!-- Evolução -->
+    <div id="evolutioncard" class="card mx-auto text-light" style="max-width: 400px;">
+      <div class="card-body">
+        <h3 class="card-title">🎆 Evolução</h3>
+        <p>Pontos: <span id="pontosEvolucaoid" class="fw-bold"></span></p>
+        <button class="btn btn-success me-2" onclick="evoluir('vida')">Evoluir Vida</button>
+        <button class="btn btn-primary" onclick="evoluir('dano')">Evoluir Dano</button>
+      </div>
+    </div>
+
+    <p id="resultadoId" class="mt-4 fs-5 fw-bold text-info"></p>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script principal -->
+  <script>
+    // ============================================================
+    // =============== CONFIGURAÇÃO BASE ==========================
+    // ============================================================
+
+    const personagensBase = {
+      Saiyajin: {vida: 30, dano: 25, imagem: "/imgs/Saiyan1.jpeg"},
+      Cerealjin: {vida: 40, dano: 20, imagem: "/imgs/granola.png"},
+      Super_Saiyajin: {vida: 35, dano: 30, imagem: "/imgs/Saiyan3.jpeg"}
+    };
+
+    const inimigosBase = {
+      Arcosians: [
+        {nome: "Arcosian 1", vida: 20, dano: 10, imagem: "/imgs/Arcosian3.jpeg"},
+        {nome: "Arcosian 2", vida: 30, dano: 15, imagem: "/imgs/Arcosian2.jpeg"},
+        {nome: "Arcosian 3", vida: 40, dano: 20, imagem: "/imgs/Arcosian.jpeg"}
+      ],
+      Majins: [
+        {nome: "Majin 1", vida: 20, dano: 10, imagem: "/imgs/Majin.jpeg"},
+        {nome: "Majin 2", vida: 30, dano: 15, imagem: "/imgs/Majin2.png"},
+        {nome: "Majin 3", vida: 40, dano: 20, imagem: "/imgs/SuperMajin.png"}
+      ],
+      Feiticeiros: [
+        {nome: "Feiticeiro 1", vida: 10, dano: 5, imagem: "/imgs/Feiticeiro.jpeg"},
+        {nome: "Feiticeiro 2", vida: 20, dano: 10, imagem: "/imgs/SuperHeeter.jpeg"},
+        {nome: "Feiticeiro 3", vida: 35, dano: 15, imagem: "/imgs/Hakaishin.png"}
+      ]
+    };
+
+    class Personagem {
+      constructor(nome, {vida, dano, imagem}) {
+        this.nome = nome;
+        this.vida = vida;
+        this.dano = dano;
+        this.imagem = imagem;
+      }
+      evoluir(atributo, pontos) {
+        this[atributo] += pontos;
+      }
+    }
+
+    let personagens = [];
+    let inimigos = {};
+    let personagemAtual;
+    let inimigosGrupoAtual = [];
+    let inimigoAtual;
+    let pontosEvolucao = 1;
+    const pontosPorEvolucao = 5;
+
+    function criarPersonagens() {
+      personagens = Object.entries(personagensBase)
+        .map(([nome, dados]) => new Personagem(nome, dados));
+      const opcoes = personagens.map((p, i) => `<option value="${i}">${p.nome}</option>`).join("");
+      $("#personagemEscolhidoId").html(opcoes);
+      personagemAtual = personagens[0];
+    }
+
+    function criarInimigos() {
+      inimigos = Object.fromEntries(
+        Object.entries(inimigosBase).map(([grupo, lista]) => [
+          grupo,
+          lista.map(i => new Personagem(i.nome, i))
+        ])
+      );
+      const grupos = Object.keys(inimigos)
+        .map(g => `<option value="${g}">${g}</option>`)
+        .join("");
+      $("#selecaoInimigosId").html(grupos);
+      selecionarGrupo();
+    }
+
+    function selecionarPersonagem() {
+      personagemAtual = personagens[$("#personagemEscolhidoId").val()];
+      atualizarInterface();
+    }
+
+    function selecionarGrupo() {
+      const grupo = $("#selecaoInimigosId").val();
+      inimigosGrupoAtual = inimigos[grupo];
+      const opcoes = inimigosGrupoAtual.map((i, idx) => `<option value="${idx}">${i.nome}</option>`).join("");
+      $("#inimigosEscolhidosId").html(opcoes);
+      selecionarInimigo();
+    }
+
+    function selecionarInimigo() {
+      inimigoAtual = inimigosGrupoAtual[$("#inimigosEscolhidosId").val()];
+      atualizarInterface();
+    }
+
+    function atacar() {
+      if (personagemAtual.vida <= 0) return mostrarMsg(`${personagemAtual.nome} está morto!`);
+      if (inimigoAtual.vida <= 0) return mostrarMsg(`${inimigoAtual.nome} já está morto!`);
+
+      inimigoAtual.vida -= personagemAtual.dano;
+      let msg = `${personagemAtual.nome} causou ${personagemAtual.dano} de dano em ${inimigoAtual.nome}. `;
+
+      if (inimigoAtual.vida <= 0) {
+        inimigoAtual.vida = 0;
+        msg += `${inimigoAtual.nome} morreu! `;
+      }
+
+      if (inimigoAtual.vida > 0) {
+        personagemAtual.vida -= inimigoAtual.dano;
+        msg += `${inimigoAtual.nome} revidou e causou ${inimigoAtual.dano} de dano! `;
+        if (personagemAtual.vida <= 0) {
+          personagemAtual.vida = 0;
+          msg += `${personagemAtual.nome} morreu! `;
+        }
+      }
+
+      if (inimigosGrupoAtual.every(i => i.vida <= 0)) {
+        $("#botaoSaquearId").attr("disabled", false);
+        msg += "🏆 Todos os inimigos foram derrotados! Saqueie os pontos!";
+      }
+
+      mostrarMsg(msg);
+      atualizarInterface();
+    }
+
+    function saquear() {
+      pontosEvolucao++;
+      $("#botaoSaquearId").attr("disabled", true);
+      mostrarMsg("💰 Você ganhou 1 ponto de evolução!");
+      atualizarInterface();
+    }
+
+    function evoluir(atributo) {
+      if (pontosEvolucao > 0) {
+        personagemAtual.evoluir(atributo, pontosPorEvolucao);
+        pontosEvolucao--;
+        mostrarMsg(`✨ ${personagemAtual.nome} evoluiu +${pontosPorEvolucao} em ${atributo}!`);
+        atualizarInterface();
+      }
+    }
+
+    function atualizarInterface() {
+      $("#vidaPersonagemId").text(personagemAtual.vida);
+      $("#danoPersonagemId").text(personagemAtual.dano);
+      $("#imagemPersonagemId").attr("src", personagemAtual.imagem);
+
+      $("#vidaInimigoId").text(inimigoAtual.vida);
+      $("#danoInimigoId").text(inimigoAtual.dano);
+      $("#imagemInimigoId").attr("src", inimigoAtual.imagem);
+
+      $("#pontosEvolucaoid").text(pontosEvolucao);
+    }
+
+    function mostrarMsg(msg) {
+      $("#resultadoId").text(msg);
+    }
+
+    function iniciar() {
+      criarPersonagens();
+      criarInimigos();
+      atualizarInterface();
+    }
+
+    $(document).ready(iniciar);
+  </script>
+</body>
+
+</html>

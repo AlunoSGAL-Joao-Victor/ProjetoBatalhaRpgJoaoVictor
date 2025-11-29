@@ -1,0 +1,116 @@
+body {
+  background-color: #212529 !important;
+  border: 5px solid #000000;
+
+}
+
+#Logo {
+  width: 25%;
+
+}
+
+#cardpersonagem {
+  background: #6C757D;
+  border: 1px solid #400401;
+  border-radius: 10px;
+
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 10px;
+
+  .card-body {
+    .card-title {
+      font-size: 1.5rem;
+      -webkit-text-stroke-color: #000;
+      -webkit-text-stroke-width: 0.25px;
+    }
+
+    select {
+      font-size: 18px;
+    }
+
+    p {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    img {
+      border: 1px solid #fff !important;
+      height: 100px !important;
+    }
+  }
+}
+
+#cardinimigo {
+  background: #6C757D;
+  border: 1px solid #400401;
+  border-radius: 10px;
+
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 10px;
+
+  .card-body {
+    .card-title {
+      font-size: 1.5rem;
+      -webkit-text-stroke-color: #000;
+      -webkit-text-stroke-width: 0.25px;
+    }
+
+    select {
+      font-size: 18px;
+    }
+
+    p {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    img {
+      border: 1px solid #fff !important;
+      height: 100px !important;
+    }
+  }
+}
+
+
+#evolutioncard {
+  /* Rectangle 5 */
+
+
+  background-color: #6C757D;
+  border: 1px solid #fff;
+
+  .btn-primary {
+    background-color: #0D6EFD !important;
+    border-color: #0D6EFD !important;
+    border-width: 2px;
+    font-weight: semibold;
+    font-size: 16px;
+
+  }
+
+  .btn-success {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+    border-width: 2px;
+    font-weight: semibold;
+    font-size: 16px;
+
+  }
+
+
+}
+
+.btn-danger {
+  width: 120px;
+  background-color: #DC3545 !important;
+  border-color: #DC3545 !important
+}
+
+.btn-warning {
+  width: 120px;
+  background-color: #B28B13 !important;
+  border-color: #B28B13 !important;
+  color: #fff !important;
+}
